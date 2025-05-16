@@ -1,0 +1,39 @@
+run:
+  timeout: 5m
+  allow-parallel-runners: true
+
+issues:
+  exclude-use-default: false
+  exclude-rules:
+    - path: "dist/*"
+      linters:
+        - all
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+        - govet
+        - revive
+linters:
+  disable-all: true
+  enable:
+    - dupl
+    - errcheck
+    - goconst
+    - gocyclo
+    - gofmt
+    - goimports
+    - gosimple
+    - govet
+    - ineffassign
+    # - lll
+    - misspell
+    - nakedret
+    - prealloc
+    - staticcheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused

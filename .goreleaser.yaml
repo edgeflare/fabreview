@@ -1,0 +1,98 @@
+version: 2
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+    # UI build steps
+    - bash -c "cd webui && npm install --force"
+    - bash -c "cd webui && npx ng build ng-essential"
+    - bash -c "cd webui && npx ng build"
+builds:
+  - id: fabreview
+    main: ./webui
+    binary: fabreview
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/edgeflare/fabreview/webui.Version={{.Version}}
+
+  - id: fabreviewcc
+    main: ./chaincode
+    binary: fabreviewcc
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/edgeflare/fabreview/chaincode.Version={{.Version}}
+
+archives:
+  - id: fabreview
+    name_template: >-
+      {{.ProjectName}}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}{{ .Arch }}{{ end }}
+    format_overrides:
+      - goos: windows
+        formats: [ 'zip' ]
+    files:
+      - README.md
+      - LICENSE*
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: edgeflare
+    name: fabreview
+  footer: |
+    ---
+    Released by [GoReleaser](https://github.com/goreleaser/goreleaser)
+
+kos:
+  - repositories:
+      - ghcr.io/edgeflare/fabreview
+    id: fabreview
+    tags:
+      - latest
+      - "{{.Version}}"
+      - "ui-latest"
+      - "ui-{{.Version}}"
+    bare: true
+    preserve_import_paths: false
+    platforms:
+      - linux/amd64
+      - linux/arm64
+
+  - repositories:
+      - ghcr.io/edgeflare/fabreview
+    id: fabreviewcc
+    tags:
+      - "cc-latest"
+      - "cc-{{.Version}}"
+    bare: true
+    preserve_import_paths: false
+    platforms:
+      - linux/amd64
+      - linux/arm64

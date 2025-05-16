@@ -1,0 +1,67 @@
+services:
+  db-postgresql:
+    image: docker.io/bitnami/postgresql:17.4.0
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespw
+      POSTGRES_DB: main
+      POSTGRESQL_WAL_LEVEL: logical
+    ports:
+    - 5432:5432
+    volumes:
+    - db-postgresql:/bitnami/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  init-db-postgresql:
+    image: docker.io/bitnami/postgresql:17.4.0
+    environment:
+      PGHOST: db-postgresql
+      PGUSER: postgres
+      PGPASSWORD: postgrespw
+      PGDATABASE: main
+    depends_on:
+      db-postgresql:
+        condition: service_healthy
+    entrypoint:
+    - /bin/bash
+    - -c
+    - |
+      echo "Waiting for PostgreSQL to be ready..."
+      until PGPASSWORD=postgrespw psql -h db-postgresql -U postgres -c '\q'; do
+        echo "PostgreSQL is unavailable - sleeping"
+        sleep 2
+      done
+      echo "PostgreSQL is up - executing SQL"
+      psql -c "
+        DO \$\$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'dex') THEN CREATE ROLE dex WITH LOGIN PASSWORD 'dexpw'; END IF;
+        END
+        \$\$;
+      "
+
+      psql -c "CREATE DATABASE dex;" || true
+      psql -c "ALTER DATABASE dex OWNER TO dex;"
+    restart: on-failure
+
+  iam-dex:
+    image: docker.io/edgeflare/dex
+    restart: always
+    command: 'dex serve /config.yaml'
+    environment:
+      DEX_CUSTOM_CLAIMS_STATIC: '{"fabric": {"id": "replacedWithSubject","type": "client","affiliation": "org1.department1","attrs": [{"name": "hf.Registrar.Roles","value": "client","ecert": true}]}}'
+    ports:
+    - 5556:5556
+    volumes:
+    - $PWD/dex.config.yaml:/config.yaml:rw,Z
+    depends_on:
+      db-postgresql:
+        condition: service_healthy
+
+volumes:
+  db-postgresql:

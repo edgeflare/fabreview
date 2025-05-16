@@ -1,0 +1,50 @@
+<section class="p-4">
+  <h1 class="text-2xl py-1 font-medium">Interacting with <code
+      class="text-blue-700">@if (isHandset()) {fabreview} @else {fabreview.edgeflare.dev}</code></h1>
+
+  <h3 class="text-lg py-1">Fabric Explorer username:password is <b><code>demo:public</code></b></h3>
+
+  <div class="" style="width: 100%; overflow-x: auto;">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Component (readonly)</th>
+        <td mat-cell *matCellDef="let element"> {{element.name}} @if (element.name !== 'Explorer') {CouchDB}</td>
+      </ng-container>
+      <ng-container matColumnDef="exturl">
+        <th mat-header-cell *matHeaderCellDef>URL</th>
+        <td mat-cell *matCellDef="let element">
+          <a [href]="element.exturl" target="_blank" class="text-blue-700">{{element.exturl}}</a>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <h2 class="text-xl pt-4 pb-1 font-medium">Write operations</h2>
+  <p>Now only <button mat-button routerLink="/write">CREATE REVIEW</button> UI is available once user is enrolled (see below). Other write operations can be done
+    via REST API.</p>
+
+  <h3 class="text-lg pt-4 pb-1 font-medium">Prerequisites</h3>
+  <ol>
+    <li>- ULID is used as id which is supplied by the client, because multiple peers don't generate same randomness.
+      Use a generator like <a href="https://ulidgenerator.com" target="_blank"
+        class="text-blue-700">ulidgenerator.com</a>,
+      <a href="https://github.com/ulid/javascript" target="_blank" class="text-blue-700">ulid/javascript</a>,
+      <a href="https://github.com/oklog/ulid" target="_blank" class="text-blue-700">oklog/ulid</a> etc
+    </li>
+    <li>- <button mat-button routerLink="/account">Obtain JWT <b>access_token</b></button></li>
+  </ol>
+
+  <div style="width: 100%; overflow-x: auto;">
+    <p class="text-lg pt-4 pb-1 font-medium">Enroll</p>
+    <pre><code>{{ enrollCmd }}</code></pre>
+    <br>
+    <h3 class="text-lg pt-4 pb-1 font-medium">Send transactions</h3>
+    <pre><code>{{ sendTxCmd }}</code></pre>
+    <br>
+    <p>See <a href="https://github.com/edgeflare/fabreview/blob/main/chaincode/contract.go" target="_blank"
+        class="text-blue-700">contract.go</a>
+      for available functions and their arguments.</p>
+  </div>
+</section>

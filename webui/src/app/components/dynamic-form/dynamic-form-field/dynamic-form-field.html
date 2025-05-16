@@ -1,0 +1,44 @@
+<div [formGroup]="form()">
+  <mat-form-field class="w-full max-w-xl" [appearance]="appearance()">
+    <mat-label [attr.for]="formField().key">{{ formField().label }}</mat-label>
+
+    @switch (formField().controlType) {
+      @case ('input') {
+        <input
+          matInput
+          [formControlName]="formField().key"
+          [id]="formField().key"
+          [type]="formField().type"
+          [placeholder]="formField().placeholder">
+      }
+      @case ('dropdown') {
+        @if (false) { <!-- TODO check for isMultiple-->
+          <mat-select multiple [formControlName]="formField().key">
+            @for (opt of formField().options; track opt) {
+              <mat-option [value]="opt.key">{{ opt.value }}</mat-option>
+            }
+          </mat-select>
+        } @else {
+          <mat-select [formControlName]="formField().key" [placeholder]="formField().placeholder">
+            @for (opt of formField().options; track opt) {
+              <mat-option [value]="opt.key">{{ opt.value }}</mat-option>
+            }
+          </mat-select>
+        }
+      }
+      @case ('textarea') {
+        <textarea
+          matInput
+          [formControlName]="formField().key"
+          [id]="formField().key"
+          [type]="formField().type"
+          [placeholder]="formField().placeholder"></textarea>
+      }
+      @default {
+        @if (!isValid) {
+          <div class="error">{{ formField().label }} is required</div>
+        }
+      }
+    }
+  </mat-form-field>
+</div>

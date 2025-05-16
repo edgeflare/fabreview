@@ -1,0 +1,50 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer class="sidenav" fixedInViewport [mode]="isHandset() ? 'over' : 'side'"
+    [opened]="isSidenavOpen()">
+    <mat-toolbar><pre><code>{{chaincode}}</code></pre></mat-toolbar>
+    <mat-nav-list>
+      @if (navItems.value() === undefined) {
+      <mat-list-item><mat-spinner></mat-spinner></mat-list-item>
+      } @else if (navItems.value()?.length === 0) {
+      <mat-list-item>No nav item found</mat-list-item>
+      } @else {
+      @for (n of navItems.value(); track $index) {
+      <div>
+        <a mat-list-item [routerLink]="['/explore', n.route]" (click)="toggleNavItemExpanded(n, $event)">
+          <div class="flex items-center w-full justify-between">
+            <span class="flex items-center justify-between">
+              <img [src]="n.icon" [alt]="n.name" style="height: 1.25rem; display: inline;"> &nbsp; {{n.name}}
+            </span>
+            <!-- <mat-icon>{{ isNavItemExpanded(n) ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</mat-icon> -->
+          </div>
+        </a>
+        <!-- @if (isNavItemExpanded(n)) {} -->
+      </div>
+      }
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content class="sidenav-content">
+    <mat-toolbar color="primary">
+      <button type="button" aria-label="Toggle sidenav" mat-icon-button (click)="toggleSidenav()">
+        <mat-icon aria-label="Side nav toggle icon">{{ isSidenavOpen() ? 'close' : 'menu' }}</mat-icon>
+      </button>
+      <span><button mat-button routerLink="/"><b><code>/home</code></b></button></span>
+      <span class="flex-grow flex-shrink basis-auto"></span>
+      <!-- @if (isFabricExplorer()) {<span>
+        <pre><code>user:pw demo:public</code></pre>
+      </span> &nbsp;} -->
+      <span><button mat-button routerLink="/docs"><b>Docs</b></button></span>
+      <e-account-button></e-account-button>
+    </mat-toolbar>
+
+    <!-- app contents begin -->
+    <main style="background-color: white;"
+      [ngStyle]="{'min-height': isHandset() ? 'calc(100vh - 7rem)' : 'calc(100vh - 8rem)'}">
+      <router-outlet></router-outlet>
+    </main>
+    <!-- app contents end -->
+
+    <e-footer />
+  </mat-sidenav-content>
+</mat-sidenav-container>
